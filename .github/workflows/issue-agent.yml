@@ -1,0 +1,38 @@
+name: Issue Implementation Agent
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  implement:
+    if: github.event.label.name == 'agent'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run implementation agent
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Read issue #${{ github.event.issue.number }}:
+            Title: ${{ github.event.issue.title }}
+            Body: ${{ github.event.issue.body }}
+
+            Based on the title and content of the issue, invoke the right agent:
+            - If it touches /backend → act as @backend-dev
+            - If it touches /frontend → act as @frontend-dev
+            - If it touches both → implement backend first, then frontend
+
+            Follow the instructions in CLAUDE.md and the relevant agent file in .claude/agents/.
+            Use the open-pr skill in .claude/skills/open-pr/SKILL.md to open a PR when done.
