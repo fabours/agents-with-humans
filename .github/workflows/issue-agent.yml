@@ -24,16 +24,22 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          show_full_output: true
+          claude_args: "--allowedTools Bash,Read,Write,Edit,TodoWrite"
           prompt: |
             Read issue #${{ github.event.issue.number }}:
             Title: ${{ github.event.issue.title }}
             Body: ${{ github.event.issue.body }}
 
-            Based on the title and content of the issue, invoke the right agent:
-            - If it touches /backend → act as @backend-dev
-            - If it touches /frontend → act as @frontend-dev
+            Based on the title and content of the issue, choose the right role:
+            - If it touches /backend → follow .claude/agents/backend-dev.md
+            - If it touches /frontend → follow .claude/agents/frontend-dev.md
             - If it touches both → implement backend first, then frontend
 
-            Follow the instructions in CLAUDE.md and the relevant agent file in .claude/agents/.
-            Use the open-pr skill in .claude/skills/open-pr/SKILL.md to open a PR when done.
+            IMPORTANT: Do NOT spawn subagents. Execute all steps yourself directly:
+            1. Read CLAUDE.md and the relevant agent file in .claude/agents/
+            2. Create a feature branch with: git checkout -b feat/issue-${{ github.event.issue.number }}-<short-description>
+            3. Implement the feature
+            4. Run tests if backend
+            5. Commit, push and open a PR using: gh pr create
+
+            Read .claude/skills/open-pr/SKILL.md for the PR format.
