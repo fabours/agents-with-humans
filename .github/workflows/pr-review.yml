@@ -23,7 +23,24 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           allowed_bots: "claude[bot]"
+          claude_args: "--allowedTools Bash,Read"
           prompt: |
-            You are a code reviewer. Review this PR following the instructions in .claude/agents/code-reviewer.md.
-            Read the diff with 'gh pr diff ${{ github.event.pull_request.number }}'.
-            Post your structured review as a PR comment using 'gh pr review'.
+            You are a code reviewer. Follow .claude/agents/code-reviewer.md strictly.
+
+            Steps:
+            1. Read the PR body with: gh pr view ${{ github.event.pull_request.number }}
+            2. Read the diff with: gh pr diff ${{ github.event.pull_request.number }}
+            3. Check the PR checklist items explicitly:
+               - [ ] No secrets committed → scan diff for keys, tokens, .env files
+               - [ ] Tests written (backend) → verify test files are in the diff
+               - [ ] Follows file structure conventions → check paths match CLAUDE.md
+            4. Post your review using: gh pr review ${{ github.event.pull_request.number }} --comment --body "..."
+
+            Your review MUST include a checklist section:
+            ## Checklist verification
+            - ✅ or ❌ No secrets committed
+            - ✅ or ❌ Tests written
+            - ✅ or ❌ File structure correct
+
+            If any ❌ → end with: gh pr review ${{ github.event.pull_request.number }} --request-changes --body "..."
+            If all ✅ → end with: gh pr review ${{ github.event.pull_request.number }} --approve --body "..."
