@@ -1,25 +1,25 @@
 name: Code Review Agent
-
+ 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-
+ 
 jobs:
   review:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
-
+ 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
+ 
       - name: Install Claude Code
-        run: npm install -g @anthropic/claude-code
-
+        run: npm install -g claude
+ 
       - name: Run code-reviewer agent
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
