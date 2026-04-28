@@ -10,6 +10,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      id-token: write
 
     steps:
       - name: Checkout repo
@@ -17,16 +18,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Claude Code
-        run: npm install -g @anthropic/claude-code
-
       - name: Run code-reviewer agent
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh auth setup-git
-          claude --agent code-reviewer \
-            "Review PR #${{ github.event.pull_request.number }}. 
-             Read the diff with 'gh pr diff ${{ github.event.pull_request.number }}' 
-             and the linked issue. Post your review with 'gh pr review'."
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            You are a code reviewer. Review this PR following the instructions in .claude/agents/code-reviewer.md.
+            Read the diff with 'gh pr diff ${{ github.event.pull_request.number }}'.
+            Post your structured review as a PR comment using 'gh pr review'.
