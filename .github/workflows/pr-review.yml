@@ -22,6 +22,7 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          allowed_bots: "claude[bot]"
           prompt: |
             You are a code reviewer. Review this PR following the instructions in .claude/agents/code-reviewer.md.
             Read the diff with 'gh pr diff ${{ github.event.pull_request.number }}'.
